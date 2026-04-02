@@ -99,6 +99,7 @@
     .grid-wrapper {
       width: 100%;
       overflow-x: auto;
+      position: relative;
     }
 
     .grid {
@@ -262,7 +263,7 @@
 
     /* ── State: greyed-out ── */
     .greyed .content-box {
-      color: var(--grey-text);
+      color: var(--grey-text) !important;
     }
 
     .row-title.greyed .row-title-text {
@@ -273,34 +274,36 @@
       opacity: 0.38;
     }
 
-    /* ── State: red border on row ── */
-    .row-highlighted .content-group,
-    .row-highlighted .row-title {
-      outline: 3px solid var(--red);
-      outline-offset: -2px;
-      position: relative;
-      z-index: 2;
+    /* ── Content box clickable (intersection mode) ── */
+    .content-box.clickable {
+      cursor: pointer;
+      user-select: none;
     }
 
-    /* ── State: red border on column ── */
-    .col-highlighted {
-      outline: 3px solid var(--red);
-      outline-offset: -2px;
-      position: relative;
-      z-index: 2;
+    .content-box.clickable:hover {
+      background: var(--primary-light);
     }
 
-    /* ── State: intersection only ── */
-    .intersection-highlighted {
-      outline: 3px solid var(--red);
-      outline-offset: -2px;
-      position: relative;
-      z-index: 3;
+    .content-box.sub-greyed {
+      color: var(--grey-text) !important;
     }
 
-    /* ── Intersection: grey overrides for text ── */
-    .greyed-intersection .content-box {
-      color: var(--grey-text);
+    /* ── Highlight overlays (positioned via JS) ── */
+    .highlight-overlay {
+      display: none;
+      position: absolute;
+      pointer-events: none;
+      border: 3px solid var(--red);
+      border-radius: 2px;
+      z-index: 10;
+    }
+
+    .highlight-overlay.active {
+      display: block;
+    }
+
+    .grid-wrapper {
+      position: relative;
     }
 
   </style>
@@ -316,7 +319,16 @@
 
   <button class="reset-btn" onclick="resetAll()">↺ Reset</button>
 
-  <div class="grid-wrapper">
+  <div class="grid-wrapper" id="grid-wrapper">
+    <!-- Highlight overlays (drawn by JS) -->
+    <div class="highlight-overlay" id="overlay-row-0"></div>
+    <div class="highlight-overlay" id="overlay-row-1"></div>
+    <div class="highlight-overlay" id="overlay-row-2"></div>
+    <div class="highlight-overlay" id="overlay-col-0"></div>
+    <div class="highlight-overlay" id="overlay-col-1"></div>
+    <div class="highlight-overlay" id="overlay-col-2"></div>
+    <div class="highlight-overlay" id="overlay-intersection"></div>
+
     <div class="grid" id="grid">
 
       <!-- Corner -->
@@ -348,19 +360,19 @@
         <input type="checkbox" id="cb-row-0" onchange="handleChange()" />
       </div>
       <div class="content-group" id="cell-0-0">
-        <div class="content-box">Business dev. systems reliably generate new opportunities.</div>
-        <div class="content-box">Data-driven insights maximize close ratios and margins.</div>
-        <div class="content-box">Predictable closing processes consistently exceed targets.</div>
+        <div class="content-box" id="box-0-0-0">Business dev. systems reliably generate new opportunities.</div>
+        <div class="content-box" id="box-0-0-1">Data-driven insights maximize close ratios and margins.</div>
+        <div class="content-box" id="box-0-0-2">Predictable closing processes consistently exceed targets.</div>
       </div>
       <div class="content-group" id="cell-0-1">
-        <div class="content-box">Repeatable processes attract and hire A-Players.</div>
-        <div class="content-box">A hiring blueprint aligns with growth goals.</div>
-        <div class="content-box">Compelling leadership inspires a shared vision.</div>
+        <div class="content-box" id="box-0-1-0">Repeatable processes attract and hire A-Players.</div>
+        <div class="content-box" id="box-0-1-1">A hiring blueprint aligns with growth goals.</div>
+        <div class="content-box" id="box-0-1-2">Compelling leadership inspires a shared vision.</div>
       </div>
       <div class="content-group" id="cell-0-2">
-        <div class="content-box">Mature projections allow for confident decisions.</div>
-        <div class="content-box">Operations run smoothly without owner intervention.</div>
-        <div class="content-box">Proven processes ensure high-quality, profitable results.</div>
+        <div class="content-box" id="box-0-2-0">Mature projections allow for confident decisions.</div>
+        <div class="content-box" id="box-0-2-1">Operations run smoothly without owner intervention.</div>
+        <div class="content-box" id="box-0-2-2">Proven processes ensure high-quality, profitable results.</div>
       </div>
 
       <!-- Row 1: In transition / growing -->
@@ -369,19 +381,19 @@
         <input type="checkbox" id="cb-row-1" onchange="handleChange()" />
       </div>
       <div class="content-group" id="cell-1-0">
-        <div class="content-box">Business dev. produces inconsistent and unproven results.</div>
-        <div class="content-box">Sales tracking exists but lacks reliable data.</div>
-        <div class="content-box">Sales targets are met sporadically, not predictably.</div>
+        <div class="content-box" id="box-1-0-0">Business dev. produces inconsistent and unproven results.</div>
+        <div class="content-box" id="box-1-0-1">Sales tracking exists but lacks reliable data.</div>
+        <div class="content-box" id="box-1-0-2">Sales targets are met sporadically, not predictably.</div>
       </div>
       <div class="content-group" id="cell-1-1">
-        <div class="content-box">Hiring is improving but lacks repeatable systems.</div>
-        <div class="content-box">Staffing needs are known but timing is vague.</div>
-        <div class="content-box">Vision is clear but team alignment is uneven.</div>
+        <div class="content-box" id="box-1-1-0">Hiring is improving but lacks repeatable systems.</div>
+        <div class="content-box" id="box-1-1-1">Staffing needs are known but timing is vague.</div>
+        <div class="content-box" id="box-1-1-2">Vision is clear but team alignment is uneven.</div>
       </div>
       <div class="content-group" id="cell-1-2">
-        <div class="content-box">Project updates and projections arrive too late to be effective.</div>
-        <div class="content-box">Delegation is starting but owner remains a bottleneck.</div>
-        <div class="content-box">Basic processes exist but projects often overrun.</div>
+        <div class="content-box" id="box-1-2-0">Project updates and projections arrive too late to be effective.</div>
+        <div class="content-box" id="box-1-2-1">Delegation is starting but owner remains a bottleneck.</div>
+        <div class="content-box" id="box-1-2-2">Basic processes exist but projects often overrun.</div>
       </div>
 
       <!-- Row 2: Chaotic at times -->
@@ -390,19 +402,19 @@
         <input type="checkbox" id="cb-row-2" onchange="handleChange()" />
       </div>
       <div class="content-group last-row" id="cell-2-0">
-        <div class="content-box">Random leads rely solely on word-of-mouth.</div>
-        <div class="content-box">Pricing or mix is guesswork; closing rates are untracked.</div>
-        <div class="content-box">Revenue is volatile and sales are unpredictable.</div>
+        <div class="content-box" id="box-2-0-0">Random leads rely solely on word-of-mouth.</div>
+        <div class="content-box" id="box-2-0-1">Pricing or mix is guesswork; closing rates are untracked.</div>
+        <div class="content-box" id="box-2-0-2">Revenue is volatile and sales are unpredictable.</div>
       </div>
       <div class="content-group last-row" id="cell-2-1">
-        <div class="content-box">Panic-hiring leads to high staff turnover.</div>
-        <div class="content-box">No blueprint exists for future hiring needs.</div>
-        <div class="content-box">Daily firefighting prevents leadership and vision.</div>
+        <div class="content-box" id="box-2-1-0">Panic-hiring leads to high staff turnover.</div>
+        <div class="content-box" id="box-2-1-1">No blueprint exists for future hiring needs.</div>
+        <div class="content-box" id="box-2-1-2">Daily firefighting prevents leadership and vision.</div>
       </div>
       <div class="content-group last-row" id="cell-2-2">
-        <div class="content-box">Scheduling is often "finger-in-the-wind" or reactive.</div>
-        <div class="content-box">Operations stall without constant owner intervention.</div>
-        <div class="content-box">Project quality and profit margins are inconsistent.</div>
+        <div class="content-box" id="box-2-2-0">Scheduling is often "finger-in-the-wind" or reactive.</div>
+        <div class="content-box" id="box-2-2-1">Operations stall without constant owner intervention.</div>
+        <div class="content-box" id="box-2-2-2">Project quality and profit margins are inconsistent.</div>
       </div>
 
     </div><!-- /grid -->
@@ -411,6 +423,9 @@
   <script>
     const NUM_ROWS = 3;
     const NUM_COLS = 3;
+
+    // Tracks which sub-box is selected per intersection key "r-c"
+    const subSelection = {};
 
     function getCheckedRows() {
       const checked = [];
@@ -429,9 +444,35 @@
     }
 
     function handleChange() {
-      const checkedRows = getCheckedRows();
-      const checkedCols = getCheckedCols();
-      applyState(checkedRows, checkedCols);
+      // Clear sub-selections when checkboxes change
+      for (const key in subSelection) delete subSelection[key];
+      applyState(getCheckedRows(), getCheckedCols());
+    }
+
+    // Returns bounding rect relative to grid-wrapper
+    function relRect(el) {
+      const wrapperRect = document.getElementById('grid-wrapper').getBoundingClientRect();
+      const elRect = el.getBoundingClientRect();
+      return {
+        top:    elRect.top    - wrapperRect.top,
+        left:   elRect.left   - wrapperRect.left,
+        width:  elRect.width,
+        height: elRect.height,
+        bottom: elRect.bottom - wrapperRect.top,
+        right:  elRect.right  - wrapperRect.left,
+      };
+    }
+
+    function positionOverlay(overlay, top, left, width, height) {
+      overlay.style.top    = top    + 'px';
+      overlay.style.left   = left   + 'px';
+      overlay.style.width  = width  + 'px';
+      overlay.style.height = height + 'px';
+      overlay.classList.add('active');
+    }
+
+    function hideOverlay(overlay) {
+      overlay.classList.remove('active');
     }
 
     function applyState(checkedRows, checkedCols) {
@@ -439,58 +480,94 @@
       const hasCol = checkedCols.length > 0;
       const bothSelected = hasRow && hasCol;
 
-      // Clear all state first
+      // --- Clear all visual state ---
       for (let r = 0; r < NUM_ROWS; r++) {
-        const rowTitle = document.getElementById(`row-title-${r}`);
-        rowTitle.classList.remove('greyed', 'row-highlighted');
+        document.getElementById(`row-title-${r}`).classList.remove('greyed');
         for (let c = 0; c < NUM_COLS; c++) {
           const cell = document.getElementById(`cell-${r}-${c}`);
-          cell.classList.remove('greyed', 'col-highlighted', 'row-highlighted', 'intersection-highlighted', 'greyed-intersection');
+          cell.classList.remove('greyed');
+          // Remove sub-box clickable/greyed state
+          for (let b = 0; b < 3; b++) {
+            const box = document.getElementById(`box-${r}-${c}-${b}`);
+            box.classList.remove('clickable', 'sub-greyed');
+            box.onclick = null;
+          }
         }
       }
       for (let c = 0; c < NUM_COLS; c++) {
         document.getElementById(`col-header-${c}`).classList.remove('greyed');
       }
+      // Hide all overlays
+      for (let r = 0; r < NUM_ROWS; r++) hideOverlay(document.getElementById(`overlay-row-${r}`));
+      for (let c = 0; c < NUM_COLS; c++) hideOverlay(document.getElementById(`overlay-col-${c}`));
+      hideOverlay(document.getElementById('overlay-intersection'));
 
-      if (!hasRow && !hasCol) return; // Nothing checked — default state
+      if (!hasRow && !hasCol) return;
 
       if (bothSelected) {
-        // Both row(s) and col(s) checked:
-        // ONLY intersection cells get red border + normal text
-        // Everything else is greyed out
-
-        // Grey all col headers except checked ones... actually all headers grey
-        for (let c = 0; c < NUM_COLS; c++) {
-          document.getElementById(`col-header-${c}`).classList.add('greyed');
-        }
-        // Grey all row titles
+        // Grey everything
+        for (let c = 0; c < NUM_COLS; c++) document.getElementById(`col-header-${c}`).classList.add('greyed');
         for (let r = 0; r < NUM_ROWS; r++) {
           document.getElementById(`row-title-${r}`).classList.add('greyed');
-        }
-        // Grey all cells, then un-grey + highlight intersections
-        for (let r = 0; r < NUM_ROWS; r++) {
           for (let c = 0; c < NUM_COLS; c++) {
-            const cell = document.getElementById(`cell-${r}-${c}`);
             const isIntersection = checkedRows.includes(r) && checkedCols.includes(c);
-            if (isIntersection) {
-              cell.classList.add('intersection-highlighted');
-            } else {
-              cell.classList.add('greyed');
+            if (!isIntersection) {
+              document.getElementById(`cell-${r}-${c}`).classList.add('greyed');
             }
           }
         }
 
-      } else if (hasRow && !hasCol) {
-        // Only row(s) checked
-        for (let r = 0; r < NUM_ROWS; r++) {
-          const rowTitle = document.getElementById(`row-title-${r}`);
-          if (checkedRows.includes(r)) {
-            rowTitle.classList.add('row-highlighted');
-            for (let c = 0; c < NUM_COLS; c++) {
-              document.getElementById(`cell-${r}-${c}`).classList.add('row-highlighted');
+        // For each intersection: make sub-boxes clickable, apply sub-selection greys
+        checkedRows.forEach(r => {
+          checkedCols.forEach(c => {
+            const key = `${r}-${c}`;
+            const selected = subSelection[key]; // undefined = none selected
+            for (let b = 0; b < 3; b++) {
+              const box = document.getElementById(`box-${r}-${c}-${b}`);
+              box.classList.add('clickable');
+              if (selected !== undefined && selected !== b) {
+                box.classList.add('sub-greyed');
+              }
+              box.onclick = () => handleSubClick(r, c, b);
             }
-          } else {
-            rowTitle.classList.add('greyed');
+          });
+        });
+
+        // Draw intersection overlay(s) — bounding box around all intersections
+        // If single intersection, draw one overlay; if multiple, draw per intersection
+        checkedRows.forEach(r => {
+          checkedCols.forEach(c => {
+            const cell = document.getElementById(`cell-${r}-${c}`);
+            const rect = relRect(cell);
+            // Reuse overlay-intersection for first; create additional if needed
+            // Simple approach: draw one overlay per intersection using overlay-intersection
+            // For multiple intersections we just pick the first — but spec says one row + one col
+            const overlay = document.getElementById('overlay-intersection');
+            positionOverlay(overlay, rect.top, rect.left, rect.width, rect.height);
+          });
+        });
+
+      } else if (hasRow && !hasCol) {
+        checkedRows.forEach(r => {
+          // Highlight: span from row-title left edge to last cell right edge
+          const titleEl = document.getElementById(`row-title-${r}`);
+          const lastCellEl = document.getElementById(`cell-${r}-${NUM_COLS - 1}`);
+          const t = relRect(titleEl);
+          const l = relRect(lastCellEl);
+          const top    = Math.min(t.top, l.top);
+          const left   = t.left;
+          const right  = l.right;
+          const bottom = Math.max(t.bottom, l.bottom);
+          positionOverlay(
+            document.getElementById(`overlay-row-${r}`),
+            top, left, right - left, bottom - top
+          );
+        });
+
+        // Grey non-selected rows
+        for (let r = 0; r < NUM_ROWS; r++) {
+          if (!checkedRows.includes(r)) {
+            document.getElementById(`row-title-${r}`).classList.add('greyed');
             for (let c = 0; c < NUM_COLS; c++) {
               document.getElementById(`cell-${r}-${c}`).classList.add('greyed');
             }
@@ -498,16 +575,22 @@
         }
 
       } else if (hasCol && !hasRow) {
-        // Only col(s) checked
+        checkedCols.forEach(c => {
+          // Highlight: span all rows in this column
+          const firstCellEl = document.getElementById(`cell-0-${c}`);
+          const lastCellEl  = document.getElementById(`cell-${NUM_ROWS - 1}-${c}`);
+          const t = relRect(firstCellEl);
+          const b = relRect(lastCellEl);
+          positionOverlay(
+            document.getElementById(`overlay-col-${c}`),
+            t.top, t.left, t.width, b.bottom - t.top
+          );
+        });
+
+        // Grey non-selected cols
         for (let c = 0; c < NUM_COLS; c++) {
-          const colHeader = document.getElementById(`col-header-${c}`);
-          if (checkedCols.includes(c)) {
-            colHeader.classList.remove('greyed');
-            for (let r = 0; r < NUM_ROWS; r++) {
-              document.getElementById(`cell-${r}-${c}`).classList.add('col-highlighted');
-            }
-          } else {
-            colHeader.classList.add('greyed');
+          if (!checkedCols.includes(c)) {
+            document.getElementById(`col-header-${c}`).classList.add('greyed');
             for (let r = 0; r < NUM_ROWS; r++) {
               document.getElementById(`cell-${r}-${c}`).classList.add('greyed');
             }
@@ -516,15 +599,26 @@
       }
     }
 
+    function handleSubClick(r, c, b) {
+      const key = `${r}-${c}`;
+      // Toggle: clicking the already-selected box deselects
+      if (subSelection[key] === b) {
+        delete subSelection[key];
+      } else {
+        subSelection[key] = b;
+      }
+      applyState(getCheckedRows(), getCheckedCols());
+    }
+
     function resetAll() {
-      for (let r = 0; r < NUM_ROWS; r++) {
-        document.getElementById(`cb-row-${r}`).checked = false;
-      }
-      for (let c = 0; c < NUM_COLS; c++) {
-        document.getElementById(`cb-col-${c}`).checked = false;
-      }
+      for (let r = 0; r < NUM_ROWS; r++) document.getElementById(`cb-row-${r}`).checked = false;
+      for (let c = 0; c < NUM_COLS; c++) document.getElementById(`cb-col-${c}`).checked = false;
+      for (const key in subSelection) delete subSelection[key];
       applyState([], []);
     }
+
+    // Reposition overlays on resize
+    window.addEventListener('resize', () => applyState(getCheckedRows(), getCheckedCols()));
   </script>
 
 </body>
