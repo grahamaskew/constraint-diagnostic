@@ -406,7 +406,7 @@
        PAGE 2 — Constraint Diagnostic
   ══════════════════════════════════════════ -->
 
-  <div id="page-2" class="page" style="display:none;">
+  <div id="page-2" class="page" style="visibility:hidden; position:absolute; top:0; left:0; width:100%">
 
   <div class="page-header">
     <span class="page-title">Constraint Diagnostic</span>
@@ -521,30 +521,56 @@
   <script>
     // ── Page navigation ──
     function goToPage(n) {
-      document.getElementById('page-1').style.display = n === 1 ? '' : 'none';
-      document.getElementById('page-2').style.display = n === 2 ? '' : 'none';
+      const p1 = document.getElementById('page-1');
+      const p2 = document.getElementById('page-2');
+      if (n === 2) {
+        p1.style.display = 'none';
+        p2.style.visibility = 'visible';
+        p2.style.position = 'relative';
+        p2.style.top = '';
+        p2.style.left = '';
+        p2.style.width = '';
+        // Reposition overlays now that page 2 is visible
+        applyState(getCheckedRows(), getCheckedCols());
+      } else {
+        p1.style.display = '';
+        p2.style.visibility = 'hidden';
+        p2.style.position = 'absolute';
+        p2.style.top = '0';
+        p2.style.left = '0';
+        p2.style.width = '100%';
+      }
     }
 
     // ── Page 1 paragraph click logic ──
     const P1_COUNT = 4;
-    const p1Clicked = new Set();
+    const p1Visited = new Set();   // paragraphs clicked at least once
+    let p1AllVisited = false;      // true once all 4 have been clicked
+
+    function p1HandleParaClick(i) {
+      if (p1AllVisited) return; // page-level click handles reveal; para clicks do nothing further
+
+      // Activate clicked, grey all others
+      document.querySelectorAll('.p1-para').forEach((p, j) => {
+        p.classList.toggle('active', j === i);
+      });
+      p1Visited.add(i);
+
+      // Once all 4 have been visited at least once, arm the page-level listener
+      if (p1Visited.size === P1_COUNT) {
+        p1AllVisited = true;
+        document.getElementById('page-1').addEventListener('click', p1RevealAll, { once: true });
+      }
+    }
+
+    function p1RevealAll() {
+      document.querySelectorAll('.p1-para').forEach(p => p.classList.add('active'));
+    }
 
     document.querySelectorAll('.p1-para').forEach((para, i) => {
-      para.addEventListener('click', () => {
-        // If all 4 are already active, do nothing
-        if (p1Clicked.size === P1_COUNT) return;
-
-        // Deactivate all others, activate this one
-        document.querySelectorAll('.p1-para').forEach((p, j) => {
-          if (j !== i) p.classList.remove('active');
-        });
-        para.classList.add('active');
-        p1Clicked.add(i);
-
-        // If all 4 have been clicked at least once, activate all
-        if (p1Clicked.size === P1_COUNT) {
-          document.querySelectorAll('.p1-para').forEach(p => p.classList.add('active'));
-        }
+      para.addEventListener('click', (e) => {
+        e.stopPropagation(); // prevent triggering page-level listener prematurely
+        p1HandleParaClick(i);
       });
     });
 
