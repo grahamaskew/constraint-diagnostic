@@ -9,18 +9,19 @@
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --primary: #6687e1;
-      --primary-light: #e8edfb;
-      --primary-mid: #b3c3f0;
-      --primary-dark: #3d5dbf;
-      --border: #c5d2f0;
-      --red: #d63e3e;
-      --grey-text: #eaeef8;
-      --grey-bg: #f0f3fa;
-      --white: #ffffff;
-      --page-bg: #f5f7fd;
-      --text: #6687e1;
-      --row-title-bg: #edf1fb;
+      --primary:       #4F6FCC;  /* primary */
+      --primary-hover: #3E59B0;  /* pressed / active */
+      --primary-light: #E8EEFC;  /* soft panels / cards */
+      --primary-mid:   #AABDFF;  /* light accent areas */
+      --primary-dark:  #2F458C;  /* headings on light tinted sections */
+      --border:        #CCD8F7;  /* subtle borders */
+      --red:           #d63e3e;
+      --grey-text:     #eaeef8;
+      --grey-bg:       #E8EEFC;
+      --white:         #ffffff;
+      --page-bg:       #F5F8FF;  /* very light background tint */
+      --text:          #4F6FCC;
+      --row-title-bg:  #E8EEFC;  /* soft panels */
     }
 
     * {
@@ -49,8 +50,7 @@
       font-size: 33px;
       font-weight: 600;
       letter-spacing: 0.04em;
-      color: var(--primary);
-      text-transform: uppercase;
+      color: var(--primary-dark);
     }
 
     .logo-wrapper {
@@ -87,7 +87,7 @@
     }
 
     .reset-btn:hover {
-      background: var(--primary);
+      background: var(--primary-hover);
       color: white;
     }
 
@@ -155,8 +155,7 @@
       font-weight: 600;
       letter-spacing: 0.09em;
       text-transform: uppercase;
-      color: var(--primary);
-      line-height: 1.4;
+      color: var(--primary-dark);
       text-align: center;
     }
 
